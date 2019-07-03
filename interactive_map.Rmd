@@ -1,8 +1,10 @@
 ---
-title: "Congaree Biosphere Reserve Historical Markers"
+title: "Congaree Biosphere Reserve"
 author: "Ethan Shafron"
 date: "July 2, 2019"
-output: html_document
+output: 
+  html_document:
+    theme: spacelab
 ---
 
 ```{r setup, include=FALSE}
@@ -35,20 +37,64 @@ markers_htmlified <- markers %>%
                     'Time period'),
            sep = "(<br>)")
 
-markers_jank_rmvd <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
-markers_jank_rmvd <- unite_(markers_jank_rmvd, "Text", c('Text - front', 'Text - reverse'))
+markers_htmlified <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
+
+markers_htmlified$`Marker name - reverse` <- gsub('(Marker Name - Reverse:)', '',
+                                                  markers_htmlified$`Marker name - reverse`)
+markers_htmlified$`Marker name - front` <- gsub('(Marker Name - Front:)', '',
+                                                  markers_htmlified$`Marker name - front`)
+markers_htmlified$City <- gsub('(City/Vicinity:)', '',
+                                                  markers_htmlified$City)
+markers_htmlified$`Address/Location` <- gsub('(Address/Location:)', '',
+                                                  markers_htmlified$`Address/Location`)
+markers_htmlified$`Text - front` <- gsub('(Text - Front:)', '',
+                                                  markers_htmlified$`Text - front`)
+markers_htmlified$`Text - reverse` <- gsub('(Text - Reverse:)', '',
+                                                  markers_htmlified$`Text - reverse`)
+markers_htmlified$Sponsor <-  gsub('(Sponsor:)', '',
+                                                  markers_htmlified$Sponsor)
+markers_htmlified$`Year approved` <- gsub('(Year Approved:)', '',
+                                          markers_htmlified$`Year approved`)
+markers_htmlified$`Time period` <- gsub('(Time Period:)', '',
+                                                  markers_htmlified$`Time period`)
+markers_htmlified$County <- gsub('(County:)', '',
+                                                  markers_htmlified$County)
+markers_jank_rmvd <- unite_(markers_htmlified, "Text", c('Text - front', 'Text - reverse'))
+
+setwd('C:/Users/ethan/Desktop/historical_data/data')
+
+br <- st_read('AOI_BR_NAD.shp')
+br <- st_transform(br, 4326)
 
 ```
 
 
 
+The Congaree Biosphere Reserve is not just unique for its natural landscape - it also has a deep, rich, and complicated cultural landscape. From pre-colonial times, through slavery, the Civil War, and Reconstruction, to now, humans in this area have left indelible marks that we now recognize as a part of the Biosphere Reserve. 
+
+
+These historical markers remind us that the landscape does not contain one story of the land and one of the people, but rather a continuous narrative in which both the land and people play a part. We hope that this interactive tool highlights some of these place-based connections that various communities have here, and that it inspires you to create your own connections with the central midlands.
+
+
+
+The data for this page came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7).
+
+This was developed using Rmarkdown and leaflet.
+
+
+
+
 
 ```{r, echo=FALSE, message = FALSE, warning=FALSE}
+library(mapview)
+library(raster)
 
-leaflet(markers_jank_rmvd) %>%
+leaflet(markers_jank_rmvd, width = 800, height = 800) %>%
   addProviderTiles(provider = providers$OpenStreetMap) %>%
   addMarkers(clusterOptions = markerClusterOptions(),
-    popup = ~as.character(Text))
+    popup = ~as.character(Text), label = ~as.character(`Marker name - front`)) %>%
+  addPolygons(data = br, fillOpacity = 0) %>%
+  addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright')
 
 ```
 

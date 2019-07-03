@@ -1,0 +1,55 @@
+---
+title: "Congaree Biosphere Reserve Historical Markers"
+author: "Ethan Shafron"
+date: "July 2, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include = FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+library(leaflet)
+library(rgdal)
+library(dplyr)
+library(tidyr)
+library(sf)
+setwd('C:/Users/ethan/Desktop/historical_data/data')
+
+markers <- invisible(st_read("S.C. Historical Marker Map.kml/doc.kml"))
+
+markers_htmlified <- markers %>%
+  separate(Description, c('County',
+                    'Marker name - front',
+                    'Marker name - reverse',
+                    'Coordinates',
+                    'City',
+                    'Address/Location',
+                    'Text - front',
+                    'Text - reverse',
+                    'Sponsor',
+                    'Year approved',
+                    'Keywords',
+                    'Time period'),
+           sep = "(<br>)")
+
+markers_jank_rmvd <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
+markers_jank_rmvd <- unite_(markers_jank_rmvd, "Text", c('Text - front', 'Text - reverse'))
+
+```
+
+
+
+
+```{r, echo=FALSE, message = FALSE, warning=FALSE}
+
+leaflet(markers_jank_rmvd) %>%
+  addProviderTiles(provider = providers$OpenStreetMap) %>%
+  addMarkers(clusterOptions = markerClusterOptions(),
+    popup = ~as.character(Text))
+
+```
+
+

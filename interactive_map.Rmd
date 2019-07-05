@@ -4,7 +4,7 @@ author: "Ethan Shafron"
 date: "July 2, 2019"
 output: 
   html_document:
-    theme: spacelab
+    theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +18,7 @@ library(rgdal)
 library(dplyr)
 library(tidyr)
 library(sf)
+library(tufte)
 setwd('C:/Users/ethan/Desktop/historical_data/data')
 
 markers <- invisible(st_read("S.C. Historical Marker Map.kml/doc.kml"))
@@ -70,16 +71,16 @@ br <- st_transform(br, 4326)
 
 
 
-The Congaree Biosphere Reserve is not just unique for its natural landscape - it also has a deep, rich, and complicated cultural landscape. From pre-colonial times, through slavery, the Civil War, and Reconstruction, to now, humans in this area have left indelible marks that we now recognize as a part of the Biosphere Reserve. 
+The Congaree Biosphere Reserve is not just unique for its natural landscape - it also has a deep cultural landscape like no other. From pre-colonial times, through slavery, the Civil War, and Reconstruction, to now, humans in this area have left indelible marks on the land that we now recognize as a part of the Biosphere Reserve. 
 
 
 These historical markers remind us that the landscape does not contain one story of the land and one of the people, but rather a continuous narrative in which both the land and people play a part. We hope that this interactive tool highlights some of these place-based connections that various communities have here, and that it inspires you to create your own connections with the central midlands.
 
 
+To use this map, simply zoom and pan around the area of interest. You can also click on "bunches" of markers to zoom in to a particular cluster of points. Hovering over a point will show you the name of the historical marker, and clicking it will reveal the text.
 
-The data for this page came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7).
 
-This was developed using Rmarkdown and leaflet.
+The data for this page came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7). The Interactive map was developed using Rmarkdown and leaflet.
 
 
 

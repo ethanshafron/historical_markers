@@ -18,10 +18,10 @@ library(rgdal)
 library(dplyr)
 library(tidyr)
 library(sf)
-library(tufte)
+
 setwd('C:/Users/ethan/Desktop/historical_data/data')
 
-markers <- invisible(st_read("S.C. Historical Marker Map.kml/doc.kml"))
+markers <- st_read("S.C. Historical Marker Map.kml/doc.kml")
 
 markers_htmlified <- markers %>%
   separate(Description, c('County',
@@ -38,6 +38,7 @@ markers_htmlified <- markers %>%
                     'Time period'),
            sep = "(<br>)")
 
+### Get rows that aren't messed up. Some entries didn't use the <br> as a sep so instead of going through a mess of regexes I filtered them out
 markers_htmlified <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
 
 markers_htmlified$`Marker name - reverse` <- gsub('(Marker Name - Reverse:)', '',
@@ -60,7 +61,11 @@ markers_htmlified$`Time period` <- gsub('(Time Period:)', '',
                                                   markers_htmlified$`Time period`)
 markers_htmlified$County <- gsub('(County:)', '',
                                                   markers_htmlified$County)
+
 markers_jank_rmvd <- unite_(markers_htmlified, "Text", c('Text - front', 'Text - reverse'))
+
+markers_clean <- markers_jank_rmvd %>%
+  select(`Marker name - front`, Text, geometry)
 
 setwd('C:/Users/ethan/Desktop/historical_data/data')
 
@@ -90,10 +95,9 @@ The data for this page came from [here](https://www.google.com/maps/d/viewer?mid
 library(mapview)
 library(raster)
 
-leaflet(markers_jank_rmvd, width = 800, height = 800) %>%
+leaflet(markers_clean, width = 800, height = 800) %>%
   addProviderTiles(provider = providers$OpenStreetMap) %>%
-  addMarkers(clusterOptions = markerClusterOptions(),
-    popup = ~as.character(Text), label = ~as.character(`Marker name - front`)) %>%
+  addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker name - front`)) %>%
   addPolygons(data = br, fillOpacity = 0) %>%
   addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright')
 

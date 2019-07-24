@@ -5,35 +5,6 @@ date: "July 2, 2019"
 output: 
   html_document:
     theme: cosmo
-params:
-  marker_name:
-    label: "Marker name"
-    value: ""
-    input: text
-  year_approved:
-    label: "Year approved"
-    value: ""
-    input: text
-  marker_text:
-    label: "Marker text"
-    value: ""
-    input: text
-  sponsor:
-    label: "Sponsor"
-    value: ""
-    input: text
-  lat:
-    label: "Latitude"
-    value: 0
-    input: numeric  
-  long:
-    label: "Longitude"
-    value: 0
-    input: numeric
-  input_marker_file:
-    label: "Input/output historical marker data:"
-    value: ""
-    input: file
 ---
 
 ```{r setup, include=FALSE}
@@ -50,7 +21,10 @@ library(sf)
 library(readxl)
 library(here)
 
-good_marker_data <- st_read(here('data/input', 'marker_data.geojson'))
+df <- file.info(list.files(here('data/input/updated'), full.names = TRUE))
+best_file <- rownames(df)[which.max(df$mtime)]
+
+good_marker_data <- st_read(best_file)
 br <- st_read(here('data/input', 'AOI_BR_NAD.shp'))
 br <- st_transform(br, 4326)
 
@@ -78,36 +52,7 @@ The data for this page came from [here](https://www.google.com/maps/d/viewer?mid
 library(mapview)
 library(raster)
 
-add_historical_marker <- function(markers_object, marker_name = '', marker_text = '', long, lat, z = 0, year_approved, sponsor = '')
-{
-  coords <- c(lat, long, z)
-  
-  x <- st_as_sf(data.frame(`Marker name - front` = as.character(c(marker_name)),
-                           Text = c(marker_text)), 
-                           geometry = st_sfc(st_point(coords), crs = 4326),
-                          `Year approved` = as.character(c(year_approved)),
-                           Sponsor = as.character(c(sponsor)),
-                           ID = as.numeric(c(NROW(markers_object) + 1)))
-  
-  
-  names(x) <- names(markers_object)
-  markers_clean_new <- rbind(markers_object, x)
-  if(file.exists(params$input_marker_file) == FALSE){
-    st_write(markers_clean_new, here('data/input', 'marker_data.geojson'))
-  }
-  return(markers_clean_new)
-}
-
-
-with_601_added <- add_historical_marker(good_marker_data,
-                                        params$marker_name,
-                                        params$marker_text,
-                                        params$long, params$lat, 0,
-                                        params$year_approved,
-                                        params$sponsor)
-
-
-leaflet(with_601_added, width = 800, height = 800) %>%
+leaflet(good_marker_data, width = 800, height = 800) %>%
   addProviderTiles(provider = providers$OpenStreetMap) %>%
   addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker.name...front`)) %>%
   addPolygons(data = br, fillOpacity = 0) %>%

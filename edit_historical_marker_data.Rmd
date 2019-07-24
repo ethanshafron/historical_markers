@@ -1,0 +1,88 @@
+---
+title: "Edit historical marker data"
+author: "Ethan Shafron"
+date: "July 24, 2019"
+output: html_document
+params:
+  marker_name:
+    label: "Marker name"
+    value: ""
+    input: text
+  year_approved:
+    label: "Year approved"
+    value: ""
+    input: text
+  marker_text:
+    label: "Marker text"
+    value: ""
+    input: text
+  sponsor:
+    label: "Sponsor"
+    value: ""
+    input: text
+  lat:
+    label: "Latitude"
+    value: 0
+    input: numeric  
+  long:
+    label: "Longitude"
+    value: 0
+    input: numeric
+  output_marker_file:
+    label: "Output updated file name - must have .geojson extension"
+    value: ""
+    input: text
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(leaflet)
+library(rgdal)
+library(dplyr)
+library(tidyr)
+library(sf)
+library(readxl)
+library(here)
+
+df <- file.info(list.files(here('data/input/updated'), full.names = TRUE))
+best_file <- rownames(df)[which.max(df$mtime)]
+
+good_marker_data <- st_read(best_file)
+
+
+add_historical_marker <- function(markers_object, marker_name = '', marker_text = '', long, lat, z = 0, year_approved, sponsor = '')
+{
+  coords <- c(lat, long, z)
+  
+  x <- st_as_sf(data.frame(`Marker name - front` = as.character(c(marker_name)),
+                           Text = c(marker_text)), 
+                           geometry = st_sfc(st_point(coords), crs = 4326),
+                          `Year approved` = as.character(c(year_approved)),
+                           Sponsor = as.character(c(sponsor)),
+                           ID = as.numeric(c(NROW(markers_object) + 1)))
+  
+  
+  names(x) <- names(markers_object)
+  markers_clean_new <- rbind(markers_object, x)
+  st_write(markers_clean_new, here('data/input/updated', params$output_marker_file), layer_options = 'OVERWRITE=YES', update = TRUE)
+  return(markers_clean_new)
+}
+
+add_historical_marker(good_marker_data,
+                      params$marker_name,
+                      params$marker_text,
+                      params$long, params$lat, 0,
+                      params$year_approved,
+                      params$sponsor)
+
+```
+
+
+
+
+
+
+

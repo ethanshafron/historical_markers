@@ -1,3 +1,9 @@
+
+packages <- c("leaflet", "rgdal", "dplyr", "tidyr", "sf", "readxl", "here")
+
+if (length(setdiff(packages, rownames(installed.packages))) > 0){install.packages(setdiff(packages, rownames(installed.packages())))}
+
+
 library(leaflet)
 library(rgdal)
 library(dplyr)

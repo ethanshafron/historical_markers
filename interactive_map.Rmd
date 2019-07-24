@@ -5,6 +5,35 @@ date: "July 2, 2019"
 output: 
   html_document:
     theme: cosmo
+params:
+  marker_name:
+    label: "Marker name"
+    value: ""
+    input: text
+  year_approved:
+    label: "Year approved"
+    value: ""
+    input: text
+  marker_text:
+    label: "Marker text"
+    value: ""
+    input: text
+  sponsor:
+    label: "Sponsor"
+    value: ""
+    input: text
+  long:
+    label: "Longitude"
+    value: 0
+    input: numeric
+  lat:
+    label: "Latitude"
+    value: 0
+    input: numeric
+  input_marker_file:
+    label: "Input/output historical marker data:"
+    value: marker_data.geojson
+    input: file
 ---
 
 ```{r setup, include=FALSE}
@@ -18,59 +47,86 @@ library(rgdal)
 library(dplyr)
 library(tidyr)
 library(sf)
+library(readxl)
+# 
+# setwd('C:/Users/ethan/Desktop/historical_data/data')
+# 
+# markers <- st_read("S.C. Historical Marker Map.kml/doc.kml")
+# 
+# markers_htmlified <- markers %>%
+#   separate(Description, c('County',
+#                     'Marker name - front',
+#                     'Marker name - reverse',
+#                     'Coordinates',
+#                     'City',
+#                     'Address/Location',
+#                     'Text - front',
+#                     'Text - reverse',
+#                     'Sponsor',
+#                     'Year approved',
+#                     'Keywords',
+#                     'Time period'),
+#            sep = "(<br>)")
+# #write.xlsx(markers_htmlified, "markers_for_manual_cleaning.csv")
+# 
+# markers_htmlified <- markers_htmlified %>% mutate(ID = row_number())
+# 
+# good_geometry <- data.frame(markers_htmlified$geometry, markers_htmlified$ID)
+# names(good_geometry) <- c('geometry', 'ID')
+# 
+# good_name <- data.frame(gsub('(Marker Name - Front:)', '', markers_htmlified$`Marker name - front`), markers_htmlified$ID)
+# names(good_name) <- c('Marker name - front', 'ID')
+# 
+# for_merging <- st_as_sf(merge(good_geometry, good_name, by = "ID"))
+# 
+# 
+# markers_cleaned <- read_xlsx('markers_for_manual_cleaning_cleaned.xlsx')
+# 
+# 
+# markers_htmlified <- markers_cleaned
+# 
+# 
+# ### Get rows that aren't messed up. Some entries didn't use the <br> as a sep so instead of going through a mess of regexes I filtered them out
+# #markers_htmlified <- markers_cleaned[grepl("Time Period:", markers_htmlified$`Time period`), ]
+# 
+# markers_htmlified$`Marker name - reverse` <- gsub('(Marker Name - Reverse:)', '',
+#                                                   markers_htmlified$`Marker name - reverse`)
+# markers_htmlified$`Marker name - front` <- gsub('(Marker Name - Front:)', '',
+#                                                   markers_htmlified$`Marker name - front`)
+# markers_htmlified$City <- gsub('(City/Vicinity:)', '',
+#                                                   markers_htmlified$City)
+# markers_htmlified$`Address/Location` <- gsub('(Address/Location:)', '',
+#                                                   markers_htmlified$`Address/Location`)
+# markers_htmlified$`Text - front` <- gsub('(Text - Front:)', '',
+#                                                   markers_htmlified$`Text - front`)
+# markers_htmlified$`Text - reverse` <- gsub('(Text - Reverse:)', '',
+#                                                   markers_htmlified$`Text - reverse`)
+# markers_htmlified$Sponsor <-  gsub('(Sponsor:)', '',
+#                                                   markers_htmlified$Sponsor)
+# markers_htmlified$`Year approved` <- gsub('(Year Approved:)', '',
+#                                           markers_htmlified$`Year approved`)
+# markers_htmlified$`Time period` <- gsub('(Time Period:)', '',
+#                                                   markers_htmlified$`Time period`)
+# markers_htmlified$County <- gsub('(County:)', '',
+#                                                   markers_htmlified$County)
+# 
+# #names(markers_htmlified) <- make.names(names(markers_htmlified))
+# 
+# markers_jank_rmvd <- unite_(markers_htmlified, "Text", c("Text - front", "Text - reverse"), sep = " ")
+# 
+# 
+# markers_clean <- markers_jank_rmvd %>%
+#   dplyr::select(`Marker name - front`, Text, `Year approved`, Sponsor)
+# 
+# markers_clean <- st_as_sf(merge(markers_clean, for_merging, by = 'Marker name - front'))
 
-setwd('C:/Users/ethan/Desktop/historical_data/data')
+#st_write(markers_clean, "marker_data.geojson")
+setwd('../data')
 
-markers <- st_read("S.C. Historical Marker Map.kml/doc.kml")
-
-markers_htmlified <- markers %>%
-  separate(Description, c('County',
-                    'Marker name - front',
-                    'Marker name - reverse',
-                    'Coordinates',
-                    'City',
-                    'Address/Location',
-                    'Text - front',
-                    'Text - reverse',
-                    'Sponsor',
-                    'Year approved',
-                    'Keywords',
-                    'Time period'),
-           sep = "(<br>)")
-
-### Get rows that aren't messed up. Some entries didn't use the <br> as a sep so instead of going through a mess of regexes I filtered them out
-markers_htmlified <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
-
-markers_htmlified$`Marker name - reverse` <- gsub('(Marker Name - Reverse:)', '',
-                                                  markers_htmlified$`Marker name - reverse`)
-markers_htmlified$`Marker name - front` <- gsub('(Marker Name - Front:)', '',
-                                                  markers_htmlified$`Marker name - front`)
-markers_htmlified$City <- gsub('(City/Vicinity:)', '',
-                                                  markers_htmlified$City)
-markers_htmlified$`Address/Location` <- gsub('(Address/Location:)', '',
-                                                  markers_htmlified$`Address/Location`)
-markers_htmlified$`Text - front` <- gsub('(Text - Front:)', '',
-                                                  markers_htmlified$`Text - front`)
-markers_htmlified$`Text - reverse` <- gsub('(Text - Reverse:)', '',
-                                                  markers_htmlified$`Text - reverse`)
-markers_htmlified$Sponsor <-  gsub('(Sponsor:)', '',
-                                                  markers_htmlified$Sponsor)
-markers_htmlified$`Year approved` <- gsub('(Year Approved:)', '',
-                                          markers_htmlified$`Year approved`)
-markers_htmlified$`Time period` <- gsub('(Time Period:)', '',
-                                                  markers_htmlified$`Time period`)
-markers_htmlified$County <- gsub('(County:)', '',
-                                                  markers_htmlified$County)
-
-markers_jank_rmvd <- unite_(markers_htmlified, "Text", c('Text - front', 'Text - reverse'))
-
-markers_clean <- markers_jank_rmvd %>%
-  select(`Marker name - front`, Text, geometry)
-
-setwd('C:/Users/ethan/Desktop/historical_data/data')
-
-br <- st_read('AOI_BR_NAD.shp')
+good_marker_data <- st_read(params$input_marker_file)
+br <- st_read('input/AOI_BR_NAD.shp')
 br <- st_transform(br, 4326)
+
 
 ```
 
@@ -85,7 +141,7 @@ These historical markers remind us that the landscape does not contain one story
 To use this map, simply zoom and pan around the area of interest. You can also click on "bunches" of markers to zoom in to a particular cluster of points. Hovering over a point will show you the name of the historical marker, and clicking it will reveal the text.
 
 
-The data for this page came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7). The Interactive map was developed using Rmarkdown and leaflet.
+The data for this page came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7). The Interactive map was developed using [R markdown](https://rmarkdown.rstudio.com/) and leaflet.
 
 
 
@@ -94,10 +150,40 @@ The data for this page came from [here](https://www.google.com/maps/d/viewer?mid
 ```{r, echo=FALSE, message = FALSE, warning=FALSE}
 library(mapview)
 library(raster)
+setwd('../data')
 
-leaflet(markers_clean, width = 800, height = 800) %>%
+add_historical_marker <- function(markers_object, marker_name = '', marker_text = '', long, lat, z = 0, year_approved, sponsor = '')
+{
+  coords <- c(long, lat, z)
+  
+  x <- st_as_sf(data.frame(`Marker name - front` = as.character(c(marker_name)),
+                           Text = c(marker_text)), 
+                           geometry = st_sfc(st_point(coords), crs = 4326),
+                          `Year approved` = as.character(c(year_approved)),
+                           Sponsor = as.character(c(sponsor)),
+                           ID = as.numeric(c(NROW(markers_object) + 1)))
+  
+  
+  names(x) <- names(markers_object)
+  markers_clean_new <- rbind(markers_object, x)
+  if(!file.exists(params$input_marker_file)){
+    st_write(markers_clean_new, "input/marker_data.geojson")
+  }
+  return(markers_clean_new)
+}
+
+
+with_601_added <- add_historical_marker(good_marker_data,
+                                        params$marker_name,
+                                        params$marker_text,
+                                        params$long, params$lat, 0,
+                                        params$year_approved,
+                                        params$sponsor)
+
+
+leaflet(with_601_added, width = 800, height = 800) %>%
   addProviderTiles(provider = providers$OpenStreetMap) %>%
-  addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker name - front`)) %>%
+  addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker.name...front`)) %>%
   addPolygons(data = br, fillOpacity = 0) %>%
   addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright')
 

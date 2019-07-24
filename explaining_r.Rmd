@@ -1,0 +1,229 @@
+---
+title: "SC Historical Markers Interactive Map README"
+author: "Ethan Shafron"
+date: "July 17, 2019"
+output:
+  html_document:
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##How to make cool things with R
+###A little bit about R
+  R is a programming language primarily used for data analysis, visualization, and statistics. It can be used in pretty much any field that uses data – from epidemiology, to engineering, to anthropology, to linguistics. It is incredibly powerful because it has thousands of packages. Packages (also sometimes called libraries) are analogous to add-ons in chrome, toolboxes in ArcGIS, and extensions in Microsoft office. In R, these are written by an individual or team, validated (often through peer review), and sent to the Comprehensive R Archive Network (CRAN), from which anyone with R can use the package with a simple command. Herein lies a ton of additional functionality that adds to the already powerful base R. As of now there are over 15,000 packages on CRAN. For a better explanation of all this and much more (including how to download R and R Studio, both of which you will need), please check out Hadley Wickham's [R for Data Science](https://r4ds.had.co.nz/introduction.html). It is the definitive book on how to get familiar with R. Like 99% of R things, it is also free and openly available online. Another fantastic resource really geared at folks with no programming experience is [Garrett Grolemund's Hands-On Programming with R](https://rstudio-education.github.io/hopr/). 
+  
+
+There are tons of other, more specialized online books for R too. The rest of this document will skim over many of these core concepts and focus purely on functionality. If your goal in reading this document is to learn how to use R, you should read (at least a bit of) those sources and practice the examples they give before trying to understand every bit of code I wrote. If your goal in reading this document is simply to understand the steps I took to make this map in general, don't worry about reading those.
+
+###How R relates to excel (Excuse my strong bias - everyone has their own preferences)
+
+In excel, you generally work visually through rows, columns, and tables. R is very different. Instead, we have vectors, observations, and data frames (which are just matrices, the same as an excel table). Additionally, in excel, a value is stored in a cell based on its location. With R, you can store values, tables, vectors, and more complicated data structures in “objects.” Without going into too much detail, you can think of these as buckets in which to store your data. These are then manipulated in memory during analysis, thus not changing your raw data at all unless you code it to do so. For now, let’s focus on data frames and vectors.
+	
+	
+So why would we ever use R over excel? While excel is indisputably more prevalent and simpler to use (it requires spatial, not algebraic reasoning), R is much more flexible and user friendly for complicated tasks. As you will see, you can use R as a geographic information system, text processor, publishing platform, statistical modeling tool, and calculator. While one could do all those things separately, having them all available in a single platform allows for workflows that are simply too cumbersome outside of a programming environment. Another reason why it is useful is that it allows for reproducibility, like all coding languages. We can comment our code to explain what each step does, we can use version control systems such as Git to document changes, and we can share our code with the public extremely easily. These steps are simply not possible with graphical user interface tools. Additionally, not sure why something isn’t working? You can just google the code and 95% of the time find an answer within seconds. You do not have to fumble around with figuring out steps on a tutorial because the answer to whatever question you have can literally be copied and pasted. It’s also free, has a massive user base, and you get to pretend like you’re neo from the matrix every time you do something. It’s a win-win-win. 
+
+
+With all that in mind *use the tool that lets you get the job done in an efficient and transparent way. There is no one correct tool for any analytical task. Most people prefer to use tools that they can use within several hours of starting to learn. Becoming flexible with R often requires a bit more time than that, but has an extremely high reward.*
+
+For the rest of this document, code chunks that I write will have a grey background. The output from said code chunks will appear with a white background.
+
+
+###Ok so what is the map thing? What exactly did you do?
+
+Before we go any further we need to talk about basic R things. In R, we use *functions* and *methods* (just think of them as the same thing) to manipulate and analyze data (usually stored in *objects*). We *assign* data to *objects* and (often times) pass the *objects* as *arguments* to *functions* to *return* some *output*.
+
+
+```{r, warning=FALSE, message=FALSE}
+people <- c('joe', 'mary', 'bob', 'carol')
+
+### Print the character vector 'people' to the console 
+people
+
+
+### You can also place comments in your code with a `#` symbol. 
+### In addition to creating objects, we can also do math with R. 
+### BTW you don't need 3 #s to write a comment, that's just personal preference. I think it's slightly more readable than just 1.
+
+1 / 200* 30
+
+
+### Let's create some objects and do math with them!
+x <- 15
+
+### Notice how spacing does not matter, but capitalization does
+y <-           26.7
+
+z <- (x + y) / pi # internal variable pi
+
+z
+```
+
+
+In this example, we use a function called `c()` to combine its arguments (each name in quotes) into a vector. We name this vector `people`. You can think of functions as mini factories. You basically send some raw stuff in (the arguments), and get something out, be it an object or something printed to the console. The function expects certain inputs though, so you can't just throw anything you want into it and expect good results - just like how you can't send a bunch of raw steel to a jewelry story and expect to get a gold necklace. There is no alchemy in coding. To make this crystal clear, the arguments to a function are named inside the function. This means that if you have a function, you can often "point" to its arguments. For example, in the `plot` function, you often see it written as `plot(data = some_dataframe, x = independent_var, y = dependent_var)`. In this example, the `data` argument is `some_dataframe`, the `x` argument is the `independent_var` column in the dataframe, and the `y` argument is the `dependent_var`column in the dataframe. This often makes code more readable, especially when a function has many optional arguments. This is a simple example, but sometimes you can have *dozens* of arguments to a function, especially in plotting.
+
+
+Arguments to a function are always separated by commas. One interesting thing about this way of doing things (and another advantage of R), is that all observations in a vector must be the same data type. This means that we could not replace “bob” in the vector with the value 3.4. We could however, replace it with “3.4” because R treats all elements of a vector in quotation marks as a character string.
+
+
+What if we want to make a table though? We can combine vectors to get matrices, aka data frames. Data frames are just vectors with multiple columns. Like vectors, in data frames, an element's position (or "index") matters. Let's make a new vector to go with `people` and combine them into a data frame.
+
+```{r, warning =FALSE, message=FALSE}
+burgers_eaten <- c(2, 1, 2, 3)
+
+burger_eating_contest <- data.frame(people, burgers_eaten)
+
+burger_eating_contest
+
+```
+
+
+Boom - a data frame! Notice the index on the left side - that's not a column, but it tells you the index of each observation in the whole dataframe. This data structure, the data frame, is absolutely fundamental to about 95% of R. We can also perform mathematical operations on rows and columns. You access columns in a data frame with the `$` symbol. You can do this to create new columns that are mathematical products of multiple preexisting ones.
+
+```{r, message=FALSE, warning = FALSE}
+
+
+### Get mean of vector in data frame
+a <- mean(burger_eating_contest$burgers_eaten)
+
+a
+
+### get standard deviation of vector in data frame
+s <- sd(burger_eating_contest$burgers_eaten)
+
+s
+
+### Make plain-jane histogram of burgers eaten
+hist(burger_eating_contest$burgers_eaten)
+
+### Make plain-jane barplot of burgers eaten per person.
+### the names.arg argument in the barplot function tells R what to name each bar. We want the bars named after the people.
+
+barplot(burger_eating_contest$burgers_eaten, names.arg = burger_eating_contest$people,
+        main = 'The Congaree burger-eating contest')
+
+
+### Remember our variable x from above?
+c <- (a + x) / s
+
+c
+```
+
+Alright, let's move on a bit. So in the first line of my code, we have:
+
+
+
+```{r, warning=FALSE, message=FALSE}
+library(leaflet)
+library(rgdal)
+library(dplyr)
+library(tidyr)
+library(sf)
+
+setwd('C:/Users/ethan/Desktop/historical_data/data')
+markers <- st_read("S.C. Historical Marker Map.kml/doc.kml")
+```
+
+
+Each line with the function `library()` is saying "Give me access to this package's functions objects, and data within this R session." If you don't have a given package installed, it will throw an error. The good news is that you can fix the error 99% of the time by just running the command `install.packages('your_package')`. I then set my working directory with the `setwd()` function. This is like adding a folder connection in ArcGIS. We are saying to the computer "Hey, let's make this directory the one that I use to access and write data, because I don't feel like typing out a long directory name every time I get or create a new file." The text that this command outputs is silenced in the map widget itself, but it is useful to read in order to get a better understanding of your data before you begin working with it. The two last rows giving us `epsg` and `proj4str` are actually important. These give us our crs/projection/datum in the file. Although `epsg` is actually originally from the European Petroleum Survey Group, the four digit codes they use to define datums, coordinate reference systems, ellipsoids, and areas of use are now standard for working with spatial data. Additionally the `proj4string` attribute is a common notation for defining coordinate systems in R and other programming languages. Good to know for when you inevitably run into CRS issues (it happens to all of us). Check the epsg and proj4string.
+
+
+Next, we pass the argument "S.C. Historical Marker Map.kml/doc.kml" into the function `st_read()`, which *does something*. What does it do? Well, it actually comes from the *package* `sf`, which is designed for reading, manipulating, and writing geospatial data in a variety of formats. Similar to how you would select a file to read in a GIS software, we do the same thing here. We assign the data contained in that file to the object `markers`. One common task that we often need to do is view the contents of our data! But how do we do that without a graphical interface? The answer is another function. We see in our environment viewer that there are 1385 observations (rows) of 3 variables (columns). Let's check out the first 6 observations with the `head()` function.
+
+
+```{r}
+head(markers)
+
+```
+
+
+AHHHH! What does that mean???? Well we aren't really starting off easy, so we may as well dive in. In R there are different types of objects that do different things and store different data. This is an `sf point` object, meaning it is basically a normal data frame (think rows and columns) with this weird `geometry` attribute. If you're thinking "Hey this sounds a whole lot like how we describe vector data in ArcGIS," you are right on the money. It's basically the same thing.
+
+
+Ok so that `Description` field... What's up with that? Well, I think that because we read this in from a KML file (which is meant for google earth),  the html popup that would normally appear as a rendering appears as raw html code. This means that we need to split that column up based on the text at the beginning of each break in the html (a break is just the start of a new paragraph in html).
+
+R is absolutely incredible for reproducible data cleaning. It is arguably the most powerful data manipulation software out there because it leverages database concepts from `SQL` and `NoSQL` pretty much natively. So now I use a function from the package `tidyr` called `separate`. This function splits a text column, `Description`, into many other columns (`Description` is the first argument to the function), a vector of new column names, and a character or sequence of characters that delineates how the variable's (column) data should be divided amongst the new columns. I know. It's confusing. In this case, since the description variable is just raw html, the character string `<br>` breaks the text into distinct paragraphs. That is the string that I used to separate the data.
+
+```{r, warning=FALSE, message=FALSE}
+markers_htmlified <- markers %>%
+  separate(Description, c('County',
+                    'Marker name - front',
+                    'Marker name - reverse',
+                    'Coordinates',
+                    'City',
+                    'Address/Location',
+                    'Text - front',
+                    'Text - reverse',
+                    'Sponsor',
+                    'Year approved',
+                    'Keywords',
+                    'Time period'),
+           sep = "(<br>)")
+
+head(markers_htmlified)
+
+```
+
+
+The next code chunk is mostly cleaning steps that are, quite frankly, not worth fully explaining here.Most of the code is text cleaning. I also created a new data frame called `markers_clean` that contains just the text, name, and geometry of the data. Then I read in the biosphere reserve boundary shapefile and transform its coordinate system using the epsg code. Then comes the fun part.
+
+
+```{r, message = FALSE, warning = FALSE}
+
+### Get rows that aren't messed up. Some entries didn't use the <br> as a sep so instead of going through a mess of regexes I filtered them out
+markers_htmlified <- markers_htmlified[grepl("Time Period:", markers_htmlified$`Time period`), ]
+
+markers_htmlified$`Marker name - reverse` <- gsub('(Marker Name - Reverse:)', '',
+                                                  markers_htmlified$`Marker name - reverse`)
+markers_htmlified$`Marker name - front` <- gsub('(Marker Name - Front:)', '',
+                                                  markers_htmlified$`Marker name - front`)
+markers_htmlified$City <- gsub('(City/Vicinity:)', '',
+                                                  markers_htmlified$City)
+markers_htmlified$`Address/Location` <- gsub('(Address/Location:)', '',
+                                                  markers_htmlified$`Address/Location`)
+markers_htmlified$`Text - front` <- gsub('(Text - Front:)', '',
+                                                  markers_htmlified$`Text - front`)
+markers_htmlified$`Text - reverse` <- gsub('(Text - Reverse:)', '',
+                                                  markers_htmlified$`Text - reverse`)
+markers_htmlified$Sponsor <-  gsub('(Sponsor:)', '',
+                                                  markers_htmlified$Sponsor)
+markers_htmlified$`Year approved` <- gsub('(Year Approved:)', '',
+                                          markers_htmlified$`Year approved`)
+markers_htmlified$`Time period` <- gsub('(Time Period:)', '',
+                                                  markers_htmlified$`Time period`)
+markers_htmlified$County <- gsub('(County:)', '',
+                                                  markers_htmlified$County)
+
+markers_jank_rmvd <- unite_(markers_htmlified, "Text", c('Text - front', 'Text - reverse'))
+
+markers_clean <- markers_jank_rmvd %>%
+  select(`Marker name - front`, Text, geometry)
+
+setwd('C:/Users/ethan/Desktop/historical_data/data')
+
+br <- st_read('AOI_BR_NAD.shp')
+br <- st_transform(br, 4326)
+
+```
+
+This next part uses a package called `leaflet`, which is really just a way of using javascript in R. This gets into wrappers, APIs, and some other upper-level computer science stuff that isn't worth addressing in this document. I don't know javascript, but it's really useful for web graphics as you will see (fun fact, html, javascript, and css are the three languages that make up pretty much every webpage). What we are doing is creating a `leaflet` object, which is a widget that is embedded in the html file that we create when we 'knit' the document in R markdown. Knitting a document essentially translates markdown (which isthe language I am writing in technically) into a format prespecified, while running and rendering the R code that you write throughout the document. This concept of "knitting" can do amazing things - for example, you can knit an R markdown document to a pdf, a powerpoint, an app, or a bunch of other things. Anyways, back to the code.
+
+As you can see, we are basically stringing together data structures, functions, object types, and operators from a whole bunch of different packages. We do this with a special operator - `%>%`. This tells the computer to "pipe" the output of the previous command into the next command. This is much more readable and efficient than assigning each part of the below command to an object and adding the next to it sequentially.
+
+```{r, message = FALSE, warning=FALSE}
+library(mapview)
+library(raster)
+
+leaflet(markers_clean, width = 800, height = 800) %>%
+  addProviderTiles(provider = providers$OpenStreetMap) %>%
+  addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker name - front`)) %>%
+  addPolygons(data = br, fillOpacity = 0) %>%
+  addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright')
+
+```
+
+
+
+Did I know how to make this map before I started? Not at all. Was I aware that these tools existed? Mostly. Could I produce this without googling the exact syntax? Absolutely not. Ultimately, when we get to this point, we only need to know the existance of the tools. Implementing them with an understanding of the basics is just a matter of googling the exact syntax. When people "learn R" what they are really doing is learning how to implement new concepts quickly and efficiently in R. That's it. Thanks and happy R-ing. 
+

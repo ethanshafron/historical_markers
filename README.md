@@ -23,7 +23,7 @@ First, before anything - Download R and R studio. Follow the instructions [here]
 
    1.	Download Git bash by following instructions [here](https://www.atlassian.com/git/tutorials/install-git) 
     
-   -  Note: If you plan on trying to make changes to the html document permanently, you will actually need to learn how to use Git and R outside of this mini-tutorial. Know that I am by no means an expert at using Git, but am proficcient with R.
+         -  Note: If you plan on trying to make changes to the html document permanently, you will actually need to learn how to use Git and R outside of this mini-tutorial. Know that I am by no means an expert at using Git, but am proficcient with R.
         
   2.	Make a github account at https://github.com/
     
@@ -35,11 +35,9 @@ First, before anything - Download R and R studio. Follow the instructions [here]
         
 `git config --global user.email your email address`
         
- 5. Confirm you set your username correctly by typing
+ 5. Confirm you set your username correctly by typing the following (it should print out your user name):
     
 `git config --global user.name`
-        
-   -	It should print out your username
         
  6. Fork the whole historical marker repository into your directory by navigating to it in your browser and, while logged in to your account, clicking “fork this repository.” Then, type the following commands in sequence to get it onto your local machine:
     
@@ -64,5 +62,5 @@ First, before anything - Download R and R studio. Follow the instructions [here]
 
 2.	To add data in the edit_historical_marker_data.rmd file, just click “knit with parameters” under the “knit” dropdown menu, enter the parameters, and press “knit.” For the interactive_map.rmd file, just press “knit” to produce a map with the most recent data created.
 
-    -	Note: If you change the directory structure of the repository, none of this will work.
+      -	Note: If you change the directory structure of the repository, none of this will work.
 

@@ -18,7 +18,7 @@ In this repository you will find:
    
       * `marker_data.geojson` - Clean, unupdated historical marker dataset in geojson format
       
-      * `markers_for_manual_cleaning_cleaned.xlsx` - Cleaned marker data to be read into `clean_kml_to)geojson.R`
+      * `markers_for_manual_cleaning_cleaned.xlsx` - Cleaned marker data to be read into `clean_kml_to_geojson.R`
       
       * `updated/` - This is the directory where updated historical marker geojson files are written to. This is updated via data entry in the `edit_historical_markers.Rmd` file.
 

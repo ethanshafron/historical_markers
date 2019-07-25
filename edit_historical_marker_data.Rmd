@@ -39,6 +39,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+
+### Check to see if you have required packages. If not, it will automatically download them when this runs.
+### Note that if you have them, this will throw an error. Just comment it out if that happens.
 packages <- c("leaflet", "rgdal", "dplyr", "tidyr", "sf", "readxl", "here")
 
 if (length(setdiff(packages, rownames(installed.packages))) > 0){install.packages(setdiff(packages, rownames(installed.packages())))}
@@ -51,16 +54,19 @@ library(sf)
 library(readxl)
 library(here)
 
+### Identify the most recently updated historical marker data
 df <- file.info(list.files(here('data/input/updated'), full.names = TRUE))
 best_file <- rownames(df)[which.max(df$mtime)]
 
+### Read in the most recently updated historical marker data
 good_marker_data <- st_read(best_file)
 
-
+### Create function that adds the data and updates the historical marker data, given user parameters
 add_historical_marker <- function(markers_object, marker_name = '', marker_text = '', long, lat, z = 0, year_approved, sponsor = '')
 {
-  coords <- c(lat, long, z)
+  coords <- c(lat, long, z) ### Create coordinate vector to be fed into st_point() and st_sfc() functions. Make sure these are long/lat
   
+  ### Create an sf object with the user input
   x <- st_as_sf(data.frame(`Marker name - front` = as.character(c(marker_name)),
                            Text = c(marker_text)), 
                            geometry = st_sfc(st_point(coords), crs = 4326),
@@ -68,13 +74,20 @@ add_historical_marker <- function(markers_object, marker_name = '', marker_text 
                            Sponsor = as.character(c(sponsor)),
                            ID = as.numeric(c(NROW(markers_object) + 1)))
   
-  
+  ### Make sure the names line up
   names(x) <- names(markers_object)
+  
+  ### Append to the prior dataset
   markers_clean_new <- rbind(markers_object, x)
+  
+  ### Write the data to a new file, named by the user
   st_write(markers_clean_new, here('data/input/updated', params$output_marker_file), layer_options = 'OVERWRITE=YES', update = TRUE)
+  
+  ### Return an sf object just for fun. Could be useful in the future, idk
   return(markers_clean_new)
 }
 
+### Do it!
 add_historical_marker(good_marker_data,
                       params$marker_name,
                       params$marker_text,

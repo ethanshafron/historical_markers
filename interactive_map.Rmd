@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r, include = FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+### Check to see if required packages are installed. If not, install them. Note that if you have all of them, it'll throw an error.
+### If that's the case, just comment this section out before you run it.
 
 packages <- c("leaflet", "rgdal", "dplyr", "tidyr", "sf", "readxl", "here", "mapview", "raster")
 
@@ -29,9 +31,11 @@ library(sf)
 library(readxl)
 library(here)
 
+### Identify the most recent historical marker file to read in
 df <- file.info(list.files(here('data/input/updated'), full.names = TRUE))
 best_file <- rownames(df)[which.max(df$mtime)]
 
+### Read in the most recent historical marker file and the biosphere boundary, then make the coordinate systems match
 good_marker_data <- st_read(best_file)
 br <- st_read(here('data/input', 'AOI_BR_NAD.shp'))
 br <- st_transform(br, 4326)
@@ -60,11 +64,12 @@ The data for this page came from [here](https://www.google.com/maps/d/viewer?mid
 library(mapview)
 library(raster)
 
-leaflet(good_marker_data, width = 800, height = 800) %>%
-  addProviderTiles(provider = providers$OpenStreetMap) %>%
+### Create the widget
+leaflet(good_marker_data, width = 800, height = 800) %>% ### Initialize leaflet object, set dimensions
+  addProviderTiles(provider = providers$OpenStreetMap) %>% ### Add open street map base layer, add marker data (line below)
   addMarkers(clusterOptions = markerClusterOptions(), popup = ~as.character(Text), label = ~as.character(`Marker.name...front`)) %>%
-  addPolygons(data = br, fillOpacity = 0) %>%
-  addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright')
+  addPolygons(data = br, fillOpacity = 0) %>% ### Add the biosphere reserve boundary polygon
+  addHomeButton(ext = extent(br), layer.name = "Zoom to Biosphere Reserve", position = 'topright') ### Add the "zoom button"
 
 ```
 

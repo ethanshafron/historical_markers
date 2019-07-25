@@ -12,10 +12,20 @@ In this repository you will find:
 
 * `clean_kml_to_geojson.R` - A script that takes the raw kml with all of its bizarre fields, parses them with a smattering of regular expressions, then outputs the clean version to a geojson for your viewing pleasure. Please note that `line 32` was originally uncommented because some of the data had to be edited by hand. The manually edited data is then read back in in `line 45`.
 
-*Note: This repository used the best available data, however, users and viewers should be aware that much of this is crowd-sourced, or created by third parties. Thus, the National Park Service, Congaree Biosphere Reserve, and myself (Ethan Shafron) take no responsibility for the accuracy of this data. The original dataset came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7), which is a site completely unaffiliated with the Biosphere Reserve.*
+* `data/` - Contains the data subdirectories. Also (at the top level) contains data that are not inputs for any of the scripts (e.g. zipped kml and csv that I had to manually edit and save as an xlsx)
+
+   * `inputs/` - Contains various inputs to the R scripts
+   
+      * `marker_data.geojson` - Clean, unupdated historical marker dataset in geojson format
+      
+      * `markers_for_manual_cleaning_cleaned.xlsx` - Cleaned marker data to be read into `clean_kml_to)geojson.R`
+      
+      * `updated/` - This is the directory where updated historical marker geojson files are written to. This is updated via data entry in the `edit_historical_markers.Rmd` file.
+
+*Note: This repository used the best available data, however, users and viewers should be aware that the raw data was created by third parties. Thus, I take no responsibility for the accuracy of the raw data. The original dataset came from [here](https://www.google.com/maps/d/viewer?mid=1t3m4iA_-a3hA8J_oPtxxNJJ2M_A&ll=33.69049557907872%2C-81.32880159895848&z=7), which is a site completely unaffiliated with the Biosphere Reserve.*
 
 
-## How to use this repository (if you're really unfamiliar with Git and R)
+## How to use this repository
 
 First, before anything - Download R and R studio. Follow the instructions [here](https://www.ics.uci.edu/~sternh/courses/210/InstallingRandRStudio.pdf). Whether you want to reproduce the map, edit the data, or add a whole bunch of functionality to the interactive map, you will need R. It's relatively easy to use and endlessly practical in day-to-day data tasks. To learn how to use R, see [Garrett Grolemund's Hands-on Programming with R](https://rstudio-education.github.io/hopr/), [Hadley Wickham's R for Data Science](https://r4ds.had.co.nz/), and for R markdown, check out [R Markdown: The Definitive Guide from Yihui Xie, J. J. Allaire, and Garrett Grolemund](https://bookdown.org/yihui/rmarkdown/) (it really is definitive).
 

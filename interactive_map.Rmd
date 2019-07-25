@@ -16,7 +16,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 packages <- c("leaflet", "rgdal", "dplyr", "tidyr", "sf", "readxl", "here", "mapview", "raster")
 
-if (length(setdiff(packages, rownames(installed.packages))) > 0){install.packages(setdiff(packages, rownames(installed.packages())))}
+if (length(setdiff(packages, rownames(installed.packages))) > 0)
+  {
+ install.packages(setdiff(packages, rownames(installed.packages())))
+  }
 
 library(leaflet)
 library(rgdal)
